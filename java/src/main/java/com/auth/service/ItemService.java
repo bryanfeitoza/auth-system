@@ -3,12 +3,16 @@ package com.auth.service;
 import com.auth.dto.ItemRequest;
 import com.auth.dto.ItemResponse;
 import com.auth.dto.MessageResponse;
+import com.auth.dto.PaginatedResponse;
 import com.auth.model.Item;
 import com.auth.model.User;
 import com.auth.repository.ItemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,11 +25,20 @@ public class ItemService {
         this.itemRepository = itemRepository;
     }
 
-    public List<ItemResponse> listItems(UUID userId) {
-        return itemRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream().map(ItemResponse::new).collect(Collectors.toList());
+    public PaginatedResponse<ItemResponse> listItems(UUID userId, int page, int limit) {
+        PageRequest pageable = PageRequest.of(page - 1, Math.min(limit, 100),
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Item> result = itemRepository.findByUserId(userId, pageable);
+
+        return new PaginatedResponse<>(
+                result.getContent().stream().map(ItemResponse::new).collect(Collectors.toList()),
+                result.getTotalElements(),
+                page,
+                result.getTotalPages()
+        );
     }
 
+    @Transactional
     public ItemResponse createItem(ItemRequest req, User user) {
         Item item = new Item();
         item.setUser(user);
@@ -42,6 +55,7 @@ public class ItemService {
         return new ItemResponse(item);
     }
 
+    @Transactional
     public ItemResponse updateItem(UUID id, ItemRequest req, UUID userId) {
         Item item = itemRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new RuntimeException("Item não encontrado"));
@@ -54,6 +68,7 @@ public class ItemService {
         return new ItemResponse(item);
     }
 
+    @Transactional
     public MessageResponse deleteItem(UUID id, UUID userId) {
         Item item = itemRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new RuntimeException("Item não encontrado"));

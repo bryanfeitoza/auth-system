@@ -1,7 +1,15 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel
+from typing import Optional, Generic, TypeVar
 from uuid import UUID
 from datetime import datetime
+
+T = TypeVar('T')
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    data: list[T]
+    total: int
+    page: int
+    total_pages: int
 
 
 class RegisterRequest(BaseModel):
@@ -14,6 +22,10 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
 
 
 class UpdateProfileRequest(BaseModel):
@@ -36,7 +48,9 @@ class UserResponse(BaseModel):
 
 
 class AuthResponse(BaseModel):
-    token: str
+    access_token: str
+    refresh_token: str
+    expires_at: datetime
     user: UserResponse
 
 

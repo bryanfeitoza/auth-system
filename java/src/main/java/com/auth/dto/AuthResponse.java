@@ -1,19 +1,26 @@
 package com.auth.dto;
 
 import com.auth.model.User;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class AuthResponse {
 
-    private String token;
+    private String accessToken;
+    private String refreshToken;
+    private LocalDateTime expiresAt;
     private UserDTO user;
 
-    public AuthResponse(String token, User user) {
-        this.token = token;
+    public AuthResponse(String accessToken, String refreshToken, LocalDateTime expiresAt, User user) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.expiresAt = expiresAt;
         this.user = new UserDTO(user);
     }
 
-    public String getToken() { return token; }
+    public String getAccessToken() { return accessToken; }
+    public String getRefreshToken() { return refreshToken; }
+    public LocalDateTime getExpiresAt() { return expiresAt; }
     public UserDTO getUser() { return user; }
 
     public static class UserDTO {

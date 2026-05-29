@@ -1,5 +1,8 @@
 let currentUser = null;
 let itemModal = null;
+let currentPage = 1;
+let currentSearch = '';
+let currentFilter = '';
 
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
@@ -18,7 +21,7 @@ function showToast(message, type = 'success') {
 }
 
 function updateNav() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('access_token');
   document.getElementById('navButtons').classList.toggle('d-none', !token);
   document.getElementById('guestButtons').classList.toggle('d-none', !!token);
 }
@@ -33,12 +36,14 @@ function showView(view) {
   container.innerHTML = Views[view]();
   container.querySelectorAll('.animated').forEach(el => el.style.animation = 'none');
 
-  if (view === 'dashboard') loadItems();
-  if (view === 'profile') loadProfile();
-
   if (view === 'dashboard') {
+    currentPage = 1;
+    currentSearch = '';
+    currentFilter = '';
+    loadItems();
     itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
   }
+  if (view === 'profile') loadProfile();
 }
 
 async function handleLogin(e) {
@@ -51,8 +56,10 @@ async function handleLogin(e) {
       email: document.getElementById('loginEmail').value,
       password: document.getElementById('loginPassword').value
     });
-    localStorage.setItem('token', data.token);
-    API.token = data.token;
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    API.accessToken = data.access_token;
+    API.refreshToken = data.refresh_token;
     currentUser = data.user;
     updateNav();
     showView('dashboard');
@@ -80,8 +87,10 @@ async function handleRegister(e) {
       password: pwd,
       phone: document.getElementById('regPhone').value
     });
-    localStorage.setItem('token', data.token);
-    API.token = data.token;
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    API.accessToken = data.access_token;
+    API.refreshToken = data.refresh_token;
     currentUser = data.user;
     updateNav();
     showView('dashboard');
@@ -93,13 +102,11 @@ async function handleRegister(e) {
   }
 }
 
-function logout() {
-  localStorage.removeItem('token');
-  API.token = null;
-  currentUser = null;
-  updateNav();
-  showView('login');
-  showToast('Você saiu da conta');
+async function logout() {
+  try {
+    await API.request('POST', '/api/auth/logout', { refresh_token: API.refreshToken });
+  } catch {}
+  API.logout();
 }
 
 async function loadProfile() {
@@ -145,7 +152,13 @@ async function handleUpdateProfile(e) {
 async function loadItems() {
   const container = document.getElementById('itemsContainer');
   try {
-    const items = await API.getItems();
+    const params = { page: currentPage, limit: 10 };
+    if (currentSearch) params.search = currentSearch;
+    if (currentFilter) params.status = currentFilter;
+
+    const result = await API.getItems(params);
+    const items = result.data || result;
+
     if (items.length === 0) {
       container.innerHTML = `
         <div class="card">
@@ -164,30 +177,74 @@ async function loadItems() {
     const statusMap = { pending: 'Pendente', in_progress: 'Em Andamento', completed: 'Concluído' };
     const statusClass = { pending: 'warning', in_progress: 'info', completed: 'success' };
 
-    container.innerHTML = items.map(item => `
-      <div class="card item-card mb-3 animated">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start">
-            <div class="flex-grow-1 me-3">
-              <h6 class="fw-bold mb-1">${escapeHtml(item.title)}</h6>
-              <p class="text-muted small mb-2">${escapeHtml(item.description || 'Sem descrição')}</p>
-              <div>
-                <span class="badge bg-${statusClass[item.status] || 'secondary'}">${statusMap[item.status] || item.status}</span>
-                <small class="text-muted ms-2">${new Date(item.created_at).toLocaleDateString('pt-BR')}</small>
+    container.innerHTML = `
+      <div class="row mb-3">
+        <div class="col-md-6 mb-2 mb-md-0">
+          <div class="input-icon">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" id="searchInput" placeholder="Buscar itens..." value="${escapeHtml(currentSearch)}"
+              onkeyup="if(event.key==='Enter'){currentSearch=this.value;currentPage=1;loadItems()}">
+          </div>
+        </div>
+        <div class="col-md-3 mb-2 mb-md-0">
+          <select class="form-select" id="filterStatus" onchange="currentFilter=this.value;currentPage=1;loadItems()">
+            <option value="">Todos os status</option>
+            <option value="pending" ${currentFilter==='pending'?'selected':''}>Pendente</option>
+            <option value="in_progress" ${currentFilter==='in_progress'?'selected':''}>Em Andamento</option>
+            <option value="completed" ${currentFilter==='completed'?'selected':''}>Concluído</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-primary w-100" onclick="currentSearch=document.getElementById('searchInput').value;currentPage=1;loadItems()">
+            <i class="bi bi-filter"></i> Filtrar
+          </button>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <small class="text-muted">${result.total || items.length} item(ns) encontrado(s)</small>
+      </div>
+      ${items.map(item => `
+        <div class="card item-card mb-3 animated">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1 me-3">
+                <h6 class="fw-bold mb-1">${escapeHtml(item.title)}</h6>
+                <p class="text-muted small mb-2">${escapeHtml(item.description || 'Sem descrição')}</p>
+                <div>
+                  <span class="badge bg-${statusClass[item.status] || 'secondary'}">${statusMap[item.status] || item.status}</span>
+                  <small class="text-muted ms-2">${new Date(item.created_at).toLocaleDateString('pt-BR')}</small>
+                </div>
               </div>
-            </div>
-            <div class="item-actions d-flex gap-1 flex-shrink-0">
-              <button class="btn btn-outline-info btn-sm" onclick="openItemModal('${item.id}')" title="Editar">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-outline-danger btn-sm" onclick="deleteItem('${item.id}')" title="Excluir">
-                <i class="bi bi-trash"></i>
-              </button>
+              <div class="item-actions d-flex gap-1 flex-shrink-0">
+                <button class="btn btn-outline-info btn-sm" onclick="openItemModal('${item.id}')" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteItem('${item.id}')" title="Excluir">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `).join('')}
+      ${result.totalPages > 1 ? `
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center pagination-sm">
+            <li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+              <button class="page-link" onclick="currentPage=Math.max(1,${currentPage-1});loadItems()">Anterior</button>
+            </li>
+            ${Array.from({length: Math.min(result.totalPages, 5)}, (_, i) => {
+              const p = i + 1;
+              return `<li class="page-item ${p === currentPage ? 'active' : ''}">
+                <button class="page-link" onclick="currentPage=${p};loadItems()">${p}</button>
+              </li>`;
+            }).join('')}
+            <li class="page-item ${currentPage >= result.totalPages ? 'disabled' : ''}">
+              <button class="page-link" onclick="currentPage=Math.min(${result.totalPages},${currentPage+1});loadItems()">Próximo</button>
+            </li>
+          </ul>
+        </nav>
+      ` : ''}`;
   } catch (err) {
     container.innerHTML = `<div class="alert alert-danger">Erro ao carregar itens: ${err.message}</div>`;
   }
@@ -256,10 +313,9 @@ function escapeHtml(text) {
 
 document.addEventListener('DOMContentLoaded', () => {
   updateNav();
-
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('access_token');
   if (token) {
-    API.token = token;
+    API.accessToken = token;
     showView('dashboard');
   } else {
     showView('login');

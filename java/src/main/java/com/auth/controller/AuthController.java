@@ -20,11 +20,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest req) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(req));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse(e.getMessage()));
         }
     }
 
@@ -36,6 +37,22 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new MessageResponse(e.getMessage()));
         }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@Valid @RequestBody RefreshRequest req) {
+        try {
+            return ResponseEntity.ok(userService.refresh(req));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody RefreshRequest req, Authentication auth) {
+        userService.logout(req != null ? req.getRefreshToken() : null, (String) auth.getDetails());
+        return ResponseEntity.ok(new MessageResponse("Logout realizado"));
     }
 
     @GetMapping("/me")

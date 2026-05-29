@@ -1,20 +1,49 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from datetime import datetime, timezone
+import math
 
 from ..database import get_db
 from ..models import Item
-from ..schemas import ItemCreate, ItemUpdate, ItemResponse, MessageResponse
+from ..schemas import ItemCreate, ItemUpdate, ItemResponse, MessageResponse, PaginatedResponse
 from ..middleware import get_current_user
 from ..models import User
 
 router = APIRouter(prefix='/items', tags=['items'])
 
 
-@router.get('/', response_model=list[ItemResponse])
-def list_items(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    items = db.query(Item).filter(Item.user_id == current_user.id).order_by(Item.created_at.desc()).all()
-    return [ItemResponse.model_validate(item) for item in items]
+@router.get('/', response_model=PaginatedResponse[ItemResponse])
+def list_items(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    search: str = Query(None),
+    status: str = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(Item).filter(Item.user_id == current_user.id)
+
+    if status:
+        query = query.filter(Item.status == status)
+
+    if search:
+        query = query.filter(
+            or_(
+                Item.title.ilike(f'%{search}%'),
+                Item.description.ilike(f'%{search}%')
+            )
+        )
+
+    total = query.count()
+    items = query.order_by(Item.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+
+    return PaginatedResponse(
+        data=[ItemResponse.model_validate(item) for item in items],
+        total=total,
+        page=page,
+        total_pages=math.ceil(total / limit) if total > 0 else 0
+    )
 
 
 @router.post('/', response_model=ItemResponse, status_code=status.HTTP_201_CREATED)

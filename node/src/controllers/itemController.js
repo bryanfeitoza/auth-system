@@ -1,12 +1,37 @@
+const { Op } = require('sequelize');
 const Item = require('../models/Item');
 
 exports.list = async (req, res) => {
   try {
-    const items = await Item.findAll({
-      where: { user_id: req.userId },
-      order: [['created_at', 'DESC']]
+    const { page = 1, limit = 10, search, status } = req.query;
+    const offset = (Math.max(1, Number(page)) - 1) * Number(limit);
+
+    const where = { user_id: req.userId };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      where[Op.or] = [
+        { title: { [Op.iLike]: `%${search}%` } },
+        { description: { [Op.iLike]: `%${search}%` } }
+      ];
+    }
+
+    const { count, rows } = await Item.findAndCountAll({
+      where,
+      order: [['created_at', 'DESC']],
+      limit: Math.min(Number(limit), 100),
+      offset
     });
-    res.json(items);
+
+    res.json({
+      data: rows,
+      total: count,
+      page: Math.max(1, Number(page)),
+      totalPages: Math.ceil(count / Math.max(1, Number(limit)))
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

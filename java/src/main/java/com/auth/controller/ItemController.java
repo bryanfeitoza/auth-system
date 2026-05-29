@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,9 +24,12 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponse>> listItems(Authentication auth) {
+    public ResponseEntity<PaginatedResponse<ItemResponse>> listItems(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            Authentication auth) {
         UUID userId = UUID.fromString((String) auth.getDetails());
-        return ResponseEntity.ok(itemService.listItems(userId));
+        return ResponseEntity.ok(itemService.listItems(userId, page, limit));
     }
 
     @PostMapping

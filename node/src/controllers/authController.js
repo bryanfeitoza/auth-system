@@ -1,6 +1,37 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
+const RefreshToken = require('../models/RefreshToken');
+
+const ACCESS_EXPIRES = '15m';
+const REFRESH_EXPIRES_DAYS = 7;
+
+function generateAccessToken(user) {
+  return jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: ACCESS_EXPIRES }
+  );
+}
+
+async function generateRefreshToken(user) {
+  const raw = crypto.randomBytes(40).toString('hex');
+  const hash = await bcrypt.hash(raw, 6);
+  const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000);
+
+  await RefreshToken.create({
+    user_id: user.id,
+    token_hash: hash,
+    expires_at: expiresAt
+  });
+
+  return { refresh_token: raw, expires_at: expiresAt };
+}
+
+function sanitizeUser(user) {
+  return { id: user.id, name: user.name, email: user.email, phone: user.phone, avatar: user.avatar };
+}
 
 exports.register = async (req, res) => {
   try {
@@ -22,16 +53,10 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashedPassword, phone });
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    );
+    const access_token = generateAccessToken(user);
+    const refresh = await generateRefreshToken(user);
 
-    res.status(201).json({
-      token,
-      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, avatar: user.avatar }
-    });
+    res.status(201).json({ access_token, ...refresh, user: sanitizeUser(user) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -55,16 +80,70 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    );
+    const access_token = generateAccessToken(user);
+    const refresh = await generateRefreshToken(user);
 
-    res.json({
-      token,
-      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, avatar: user.avatar }
+    res.json({ access_token, ...refresh, user: sanitizeUser(user) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.refresh = async (req, res) => {
+  try {
+    const { refresh_token } = req.body;
+    if (!refresh_token) {
+      return res.status(400).json({ error: 'Refresh token é obrigatório' });
+    }
+
+    const tokens = await RefreshToken.findAll({
+      where: { revoked: false },
+      order: [['created_at', 'DESC']]
     });
+
+    let matched = null;
+    for (const t of tokens) {
+      if (t.expires_at < new Date()) {
+        await t.update({ revoked: true });
+        continue;
+      }
+      const ok = await bcrypt.compare(refresh_token, t.token_hash);
+      if (ok) { matched = t; break; }
+    }
+
+    if (!matched) {
+      return res.status(401).json({ error: 'Refresh token inválido ou expirado' });
+    }
+
+    await matched.update({ revoked: true });
+
+    const user = await User.findByPk(matched.user_id);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    const access_token = generateAccessToken(user);
+    const refresh = await generateRefreshToken(user);
+
+    res.json({ access_token, ...refresh, user: sanitizeUser(user) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    const { refresh_token } = req.body;
+    if (refresh_token) {
+      const tokens = await RefreshToken.findAll({
+        where: { user_id: req.userId, revoked: false }
+      });
+      for (const t of tokens) {
+        const ok = await bcrypt.compare(refresh_token, t.token_hash);
+        if (ok) { await t.update({ revoked: true }); break; }
+      }
+    }
+    res.json({ message: 'Logout realizado' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -93,7 +172,7 @@ exports.update = async (req, res) => {
     if (avatar !== undefined) user.avatar = avatar;
     await user.save();
 
-    res.json({ id: user.id, name: user.name, email: user.email, phone: user.phone, avatar: user.avatar });
+    res.json(sanitizeUser(user));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
