@@ -7,8 +7,8 @@ from .config import settings
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title='AuthSystem - Python',
-    description='Sistema de autenticação com JWT e CRUD',
+    title='AuthSystem - Python — for Bryan Feitoza portifolio',
+    description='Sistema de autenticação com JWT e CRUD — for Bryan Feitoza portifolio',
     version='1.0.0'
 )
 
@@ -26,7 +26,7 @@ app.include_router(items.router, prefix='/api')
 
 @app.get('/api/health')
 def health():
-    return {'status': 'ok', 'service': 'python-fastapi'}
+    return {'status': 'ok', 'service': 'python-fastapi', 'author': 'Bryan Feitoza', 'portfolio': 'for Bryan Feitoza portifolio'}
 
 
 if __name__ == '__main__':

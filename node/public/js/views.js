@@ -10,6 +10,9 @@ const Views = {
               </div>
               <h4 class="fw-bold">Bem-vindo de volta</h4>
               <p class="text-muted">Entre com suas credenciais</p>
+              <div class="alert alert-info py-2 small" role="alert">
+                <i class="bi bi-info-circle me-1"></i> Teste: <strong>admin@test.com</strong> / <strong>admin123</strong>
+              </div>
             </div>
             <form onsubmit="handleLogin(event)">
               <div class="mb-3 input-icon">

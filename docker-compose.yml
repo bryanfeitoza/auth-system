@@ -3,8 +3,6 @@
 # Uso: docker compose up -d
 # ──────────────────────────────────────────────
 
-version: '3.8'
-
 services:
   # ─── Banco de Dados ───
   postgres:

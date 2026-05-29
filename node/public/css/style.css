@@ -1,35 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --primary: #0d6efd;
   --primary-hover: #0b5ed7;
+  --primary-glow: rgba(13, 110, 253, 0.15);
   --bg-card: #1e1e2e;
-  --bg-body: #13131f;
+  --bg-body: #0f0f1a;
   --border-color: #2a2a3e;
   --text-muted: #8b8ba3;
+  --gradient-1: linear-gradient(135deg, #0d6efd, #6610f2);
+  --gradient-2: linear-gradient(135deg, #0d6efd, #0dcaf0);
 }
 
 * { font-family: 'Inter', sans-serif; }
 
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-body); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a5e; }
+
 body {
   background: var(--bg-body);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-image:
+    radial-gradient(ellipse at 10% 20%, rgba(13, 110, 253, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 80%, rgba(102, 16, 242, 0.04) 0%, transparent 50%);
+}
+
+.bg-glow {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(13, 110, 253, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+  animation: glowPulse 8s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
 }
 
 .navbar {
-  backdrop-filter: blur(12px);
-  background: rgba(19, 19, 31, 0.85) !important;
+  backdrop-filter: blur(16px);
+  background: rgba(15, 15, 26, 0.85) !important;
+  border-bottom: 1px solid rgba(42, 42, 62, 0.5) !important;
 }
+
+.navbar-brand {
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.navbar-brand i { -webkit-text-fill-color: initial; color: var(--primary); }
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .card:hover {
   box-shadow: 0 8px 32px rgba(13, 110, 253, 0.08);
+  border-color: rgba(13, 110, 253, 0.2);
 }
 
 .auth-card {
@@ -46,6 +87,7 @@ body {
   border-radius: 10px;
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
 .form-control:focus, .form-select:focus {
@@ -60,18 +102,37 @@ body {
 .btn {
   border-radius: 10px;
   padding: 0.65rem 1.5rem;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: var(--gradient-1);
   border: none;
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s;
+}
 
-.btn-outline-light:hover { transform: translateY(-1px); }
+.btn-primary:hover::before { left: 100%; }
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3); }
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-outline-light:hover { transform: translateY(-2px); }
+
+.btn-danger:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3); }
 
 .btn-sm { padding: 0.4rem 0.8rem; }
 
@@ -90,14 +151,15 @@ body {
   justify-content: center;
   font-weight: 600;
   font-size: 1.2rem;
-  background: linear-gradient(135deg, var(--primary), #6610f2);
+  background: var(--gradient-1);
   color: #fff;
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
 }
 
 .avatar-lg {
-  width: 80px;
-  height: 80px;
-  font-size: 2rem;
+  width: 100px;
+  height: 100px;
+  font-size: 2.5rem;
 }
 
 .input-icon {
@@ -110,6 +172,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
   color: #5a5a7a;
+  z-index: 1;
 }
 
 .input-icon .form-control { padding-left: 2.8rem; }
@@ -119,14 +182,17 @@ body {
   color: var(--text-muted);
 }
 
-.empty-state i { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state i { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.5; }
 
 .item-card {
   transition: all 0.2s;
   border-left: 4px solid var(--primary);
 }
 
-.item-card:hover { border-left-color: #6610f2; }
+.item-card:hover {
+  border-left-color: #6610f2;
+  transform: translateX(4px);
+}
 
 .item-actions .btn {
   padding: 0.25rem 0.5rem;
@@ -134,16 +200,57 @@ body {
 }
 
 .animated {
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.35s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.footer {
+  margin-top: auto;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+  background: rgba(15, 15, 26, 0.6);
+}
+
+.footer p { font-size: 0.9rem; }
+
+.modal-content {
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+}
+
+.modal-header { border-radius: 16px 16px 0 0; }
+
+.pagination .page-link {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: #fff;
+}
+
+.pagination .page-link:hover {
+  background: #2a2a3e;
+  color: var(--primary);
+}
+
+.pagination .page-item.active .page-link {
+  background: var(--gradient-1);
+  border-color: transparent;
+}
+
+.alert-info {
+  background: rgba(13, 202, 240, 0.1);
+  border: 1px solid rgba(13, 202, 240, 0.2);
+  color: #0dcaf0;
+  border-radius: 10px;
 }
 
 @media (max-width: 576px) {
   .auth-card .card-body { padding: 1.5rem; }
-  .navbar-brand { font-size: 1rem; }
+  .navbar-brand { font-size: 0.9rem; }
+  .navbar-brand small { font-size: 0.7rem !important; }
   .container { padding-left: 1rem; padding-right: 1rem; }
 }
