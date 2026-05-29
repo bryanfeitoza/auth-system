@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: auth_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-auth_user}
+      POSTGRES_PASSWORD: ${DB_PASS:-auth_password}
+      POSTGRES_DB: ${DB_NAME:-auth_system}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - auth_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: auth_pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS:-admin}
+    depends_on:
+      - postgres
+    networks:
+      - auth_network
+
+networks:
+  auth_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
