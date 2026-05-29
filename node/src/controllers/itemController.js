@@ -3,8 +3,10 @@ const Item = require('../models/Item');
 
 exports.list = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, status } = req.query;
-    const offset = (Math.max(1, Number(page)) - 1) * Number(limit);
+    const { page: rawPage, limit: rawLimit, search, status } = req.query;
+    const page = Math.max(1, parseInt(rawPage, 10) || 1);
+    const limit = Math.min(Math.max(1, parseInt(rawLimit, 10) || 10), 100);
+    const offset = (page - 1) * limit;
 
     const where = { user_id: req.userId };
 
@@ -13,27 +15,29 @@ exports.list = async (req, res) => {
     }
 
     if (search) {
+      const safeSearch = String(search).slice(0, 200);
       where[Op.or] = [
-        { title: { [Op.iLike]: `%${search}%` } },
-        { description: { [Op.iLike]: `%${search}%` } }
+        { title: { [Op.iLike]: `%${safeSearch}%` } },
+        { description: { [Op.iLike]: `%${safeSearch}%` } }
       ];
     }
 
     const { count, rows } = await Item.findAndCountAll({
       where,
       order: [['created_at', 'DESC']],
-      limit: Math.min(Number(limit), 100),
+      limit,
       offset
     });
 
     res.json({
       data: rows,
       total: count,
-      page: Math.max(1, Number(page)),
-      totalPages: Math.ceil(count / Math.max(1, Number(limit)))
+      page,
+      totalPages: Math.ceil(count / limit)
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Items] Erro no list:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -45,7 +49,8 @@ exports.create = async (req, res) => {
     const item = await Item.create({ user_id: req.userId, title, description, status });
     res.status(201).json(item);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Items] Erro no create:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -55,7 +60,8 @@ exports.get = async (req, res) => {
     if (!item) return res.status(404).json({ error: 'Item não encontrado' });
     res.json(item);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Items] Erro no get:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -72,7 +78,8 @@ exports.update = async (req, res) => {
 
     res.json(item);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Items] Erro no update:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -84,6 +91,7 @@ exports.delete = async (req, res) => {
     await item.destroy();
     res.json({ message: 'Item removido com sucesso' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Items] Erro no delete:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };

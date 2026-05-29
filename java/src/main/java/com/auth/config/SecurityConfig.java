@@ -7,9 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -77,13 +80,12 @@ public class SecurityConfig {
                         var claims = jwtService.validateToken(token);
                         String userId = claims.get("id", String.class);
 
-                        var auth = new org.springframework.security.authentication
-                                .UsernamePasswordAuthenticationToken(userId, null, List.of());
+                        var auth = new UsernamePasswordAuthenticationToken(
+                                userId, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                         auth.setDetails(userId);
-                        org.springframework.security.core.context.SecurityContextHolder
-                                .getContext().setAuthentication(auth);
+                        SecurityContextHolder.getContext().setAuthentication(auth);
                     } catch (Exception e) {
-                        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+                        SecurityContextHolder.clearContext();
                     }
                 }
 

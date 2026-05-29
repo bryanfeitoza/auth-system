@@ -13,7 +13,7 @@ class Settings:
     DB_HOST: str = os.getenv('DB_HOST', 'localhost')
     DB_PORT: str = os.getenv('DB_PORT', '5432')
 
-    JWT_SECRET: str = os.getenv('JWT_SECRET', 'seu-segredo-jwt-super-seguro')
+    JWT_SECRET: str = os.environ['JWT_SECRET']
     JWT_ALGORITHM: str = 'HS256'
     JWT_EXPIRES_IN: int = 7 * 24 * 60 * 60
 

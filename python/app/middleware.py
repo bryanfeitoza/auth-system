@@ -15,9 +15,14 @@ def get_current_user(
 ) -> User:
     token = credentials.credentials
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET,
+            algorithms=[settings.JWT_ALGORITHM],
+            options={"verify_exp": True}
+        )
         user_id: str = payload.get('id')
-        if user_id is None:
+        token_type: str = payload.get('type')
+        if user_id is None or token_type != 'access':
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token inválido')
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token inválido ou expirado')

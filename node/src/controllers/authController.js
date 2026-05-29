@@ -1,11 +1,13 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { Op } = require('sequelize');
 const User = require('../models/User');
 const RefreshToken = require('../models/RefreshToken');
 
-const ACCESS_EXPIRES = '15m';
+const ACCESS_EXPIRES = process.env.JWT_ACCESS_EXPIRES || '15m';
 const REFRESH_EXPIRES_DAYS = 7;
+const BCRYPT_ROUNDS = 10;
 
 function generateAccessToken(user) {
   return jwt.sign(
@@ -17,7 +19,7 @@ function generateAccessToken(user) {
 
 async function generateRefreshToken(user) {
   const raw = crypto.randomBytes(40).toString('hex');
-  const hash = await bcrypt.hash(raw, 6);
+  const hash = await bcrypt.hash(raw, BCRYPT_ROUNDS);
   const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000);
 
   await RefreshToken.create({
@@ -50,7 +52,7 @@ exports.register = async (req, res) => {
       return res.status(409).json({ error: 'Email já cadastrado' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const user = await User.create({ name, email, password: hashedPassword, phone });
 
     const access_token = generateAccessToken(user);
@@ -58,7 +60,8 @@ exports.register = async (req, res) => {
 
     res.status(201).json({ access_token, ...refresh, user: sanitizeUser(user) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Auth] Erro no register:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -75,6 +78,10 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
+    if (!user.is_active) {
+      return res.status(403).json({ error: 'Conta desativada' });
+    }
+
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
@@ -85,7 +92,8 @@ exports.login = async (req, res) => {
 
     res.json({ access_token, ...refresh, user: sanitizeUser(user) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Auth] Erro no login:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -96,6 +104,11 @@ exports.refresh = async (req, res) => {
       return res.status(400).json({ error: 'Refresh token é obrigatório' });
     }
 
+    await RefreshToken.update(
+      { revoked: true },
+      { where: { expires_at: { [Op.lt]: new Date() }, revoked: false } }
+    );
+
     const tokens = await RefreshToken.findAll({
       where: { revoked: false },
       order: [['created_at', 'DESC']]
@@ -103,10 +116,6 @@ exports.refresh = async (req, res) => {
 
     let matched = null;
     for (const t of tokens) {
-      if (t.expires_at < new Date()) {
-        await t.update({ revoked: true });
-        continue;
-      }
       const ok = await bcrypt.compare(refresh_token, t.token_hash);
       if (ok) { matched = t; break; }
     }
@@ -127,7 +136,8 @@ exports.refresh = async (req, res) => {
 
     res.json({ access_token, ...refresh, user: sanitizeUser(user) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Auth] Erro no refresh:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -145,7 +155,8 @@ exports.logout = async (req, res) => {
     }
     res.json({ message: 'Logout realizado' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Auth] Erro no logout:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -157,7 +168,8 @@ exports.me = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
     res.json(user);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Auth] Erro no me:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };
 
@@ -174,6 +186,7 @@ exports.update = async (req, res) => {
 
     res.json(sanitizeUser(user));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[Auth] Erro no update:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };

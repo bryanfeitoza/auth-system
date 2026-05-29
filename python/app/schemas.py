@@ -1,9 +1,10 @@
-from pydantic import BaseModel
-from typing import Optional, Generic, TypeVar
+from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional, Generic, TypeVar, Literal
 from uuid import UUID
 from datetime import datetime
 
 T = TypeVar('T')
+
 
 class PaginatedResponse(BaseModel, Generic[T]):
     data: list[T]
@@ -14,13 +15,20 @@ class PaginatedResponse(BaseModel, Generic[T]):
 
 class RegisterRequest(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     password: str
     phone: Optional[str] = None
 
+    @field_validator('password')
+    @classmethod
+    def password_min_length(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError('Senha deve ter no mínimo 6 caracteres')
+        return v
+
 
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -57,13 +65,13 @@ class AuthResponse(BaseModel):
 class ItemCreate(BaseModel):
     title: str
     description: Optional[str] = None
-    status: str = 'pending'
+    status: Literal['pending', 'in_progress', 'completed'] = 'pending'
 
 
 class ItemUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[Literal['pending', 'in_progress', 'completed']] = None
 
 
 class ItemResponse(BaseModel):

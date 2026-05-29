@@ -3,6 +3,7 @@ package com.auth.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,23 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final SecretKey key;
-    private final long accessExpiration; // minutes
+    private final String secret;
+    private final long expirationMinutes;
+    private SecretKey key;
 
     public JwtService(
-            @Value("${jwt.secret}") String secret) {
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long expirationMinutes) {
+        this.secret = secret;
+        this.expirationMinutes = expirationMinutes;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET nao configurado");
+        }
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.accessExpiration = 15;
     }
 
     public String generateAccessToken(String userId, String email) {
@@ -28,7 +39,7 @@ public class JwtService {
                 .claim("email", email)
                 .claim("type", "access")
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + accessExpiration * 60 * 1000))
+                .expiration(new Date(System.currentTimeMillis() + expirationMinutes * 60 * 1000))
                 .signWith(key)
                 .compact();
     }

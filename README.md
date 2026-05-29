@@ -1,204 +1,156 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/Status-Completed-success?style=for-the-badge" alt="Status">
-  <img src="https://img.shields.io/github/stars/bryanfeitoza/auth-system?style=for-the-badge&logo=github" alt="Stars">
-  <img src="https://img.shields.io/github/languages/count/bryanfeitoza/auth-system?style=for-the-badge" alt="Languages">
-  <img src="https://img.shields.io/github/last-commit/bryanfeitoza/auth-system?style=for-the-badge" alt="Last Commit">
-</div>
-
-<br>
-
-<div align="center">
   <h1>AuthSystem</h1>
   <p><strong>for Bryan Feitoza portifolio</strong></p>
-  <p><em>Sistema completo de autenticacao com JWT, bcrypt, PostgreSQL e CRUD — implementado em 3 stacks diferentes no mesmo repositorio</em></p>
+  <p><em>API de autenticação com JWT e CRUD implementada em Node.js, Python (FastAPI) e Java (Spring Boot)</em></p>
 </div>
 
 <br>
 
 <div align="center">
-  <a href="node/">
-    <img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
-  </a>
-  <a href="python/">
-    <img src="https://img.shields.io/badge/Python-FastAPI-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  </a>
-  <a href="java/">
-    <img src="https://img.shields.io/badge/Java-Spring_Boot-6DB33F?style=for-the-badge&logo=spring&logoColor=white" alt="Java">
-  </a>
-  <a href="docker-compose.yml">
-    <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
-  </a>
-  <a href="node/src/middleware/auth.js">
-    <img src="https://img.shields.io/badge/JWT-auth-000000?style=for-the-badge&logo=jsonwebtoken&logoColor=white" alt="JWT">
-  </a>
+  <img src="https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Python-FastAPI-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Java-Spring_Boot-6DB33F?style=flat-square&logo=spring&logoColor=white" alt="Java">
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/JWT-auth-000000?style=flat-square&logo=jsonwebtoken&logoColor=white" alt="JWT">
+  <img src="https://img.shields.io/github/license/bryanfeitoza/auth-system?style=flat-square" alt="License">
 </div>
 
 ---
 
-## Funcionalidades
+## Sobre o projeto
 
-| Funcionalidade | Node.js | Python | Java |
-|---|---|---|---|
-| Registro de usuario | Sim | Sim | Sim |
-| Login com JWT | Sim | Sim | Sim |
-| Refresh Token | Sim | Sim | Sim |
-| Perfil (CRUD) | Sim | Sim | Sim |
-| Itens (CRUD completo) | Sim | Sim | Sim |
-| Senhas com bcrypt | Sim | Sim | Sim |
-| Frontend Bootstrap 5 | Sim | Nao (Swagger) | Nao |
-| Paginacao e busca | Sim | Sim | Sim |
-| Health check | Sim | Sim | Sim |
+API completa de autenticação com registro, login, refresh token JWT e CRUD de itens. O mesmo sistema foi implementado em tres stacks diferentes compartilhando o mesmo banco PostgreSQL, demonstrando versatilidade tecnica e capacidade de adaptacao entre ecossistemas.
+
+**Autor:** Bryan Feitoza  
+**Proposito:** Portfolio pessoal
 
 ---
 
-## Como iniciar
+## Stacks implementadas
 
-### Pre-requisitos
+| Aspecto | Node.js | Python | Java |
+|---------|---------|--------|------|
+| **Framework** | Express | FastAPI | Spring Boot 3 |
+| **ORM** | Sequelize | SQLAlchemy | JPA/Hibernate |
+| **Seguranca** | bcryptjs + jsonwebtoken | passlib + python-jose | BCryptEncoder + jjwt |
+| **Validacao** | Manual + middleware | Pydantic | Bean Validation |
+| **Frontend** | Bootstrap 5 SPA | Swagger UI | - |
+| **Porta** | 3000 | 8000 | 8080 |
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando
-- WSL2 atualizado (Windows): `wsl --update`
+---
 
-### Subir tudo com um comando
+## Como executar
+
+**Pre-requisitos:** Docker Desktop, WSL2 atualizado (`wsl --update`)
 
 ```bash
 docker compose up -d --build
 ```
 
-### Acessar os servicos
+Apos a inicializacao, os servicos estarao disponiveis:
 
-| Servico | URL | Descricao |
-|---------|-----|-----------|
-| Node.js | http://localhost:3000 | Frontend completo + API REST |
-| Python | http://localhost:8000/docs | Swagger UI interativo |
-| Java | http://localhost:8080/api/health | Health check |
-| pgAdmin | http://localhost:5050 | `admin@admin.com` / `admin` |
-| Nginx | http://localhost | Proxy reverso |
+| URL | Servico |
+|-----|---------|
+| http://localhost:3000 | Node.js (frontend completo) |
+| http://localhost:8000/docs | Python (Swagger UI) |
+| http://localhost:8080/api/health | Java (health check) |
+| http://localhost:5050 | pgAdmin (admin@admin.com / admin) |
 
-### Parar
-
+Para parar:
 ```bash
 docker compose down
 ```
 
 ---
 
-## Como testar
+## Testando
 
-### Login admin automatico
+**Login admin** (criado automaticamente na inicializacao do Node.js):
 
-Na inicializacao do Node.js, um usuario admin e criado automaticamente:
-
-| Campo | Valor |
+| Email | Senha |
 |-------|-------|
-| **Email** | `admin@test.com` |
-| **Senha** | `admin123` |
+| admin@test.com | admin123 |
 
-Acesse http://localhost:3000 e faca login. A dica do admin aparece direto na tela de login.
+Acesse http://localhost:3000 e faca login, ou use curl:
 
-### Endpoints da API
+```bash
+curl -s -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@test.com","password":"admin123"}' | jq .
+```
 
-| Metodo | Rota | Descricao | Autenticacao |
-|--------|------|-----------|-------------|
-| POST | `/api/auth/register` | Criar conta | - |
-| POST | `/api/auth/login` | Fazer login | - |
+**Health checks:**
+```bash
+curl http://localhost:3000/api/health
+curl http://localhost:8000/api/health
+curl http://localhost:8080/api/health
+```
+
+---
+
+## Endpoints
+
+| Metodo | Rota | Descricao | Auth |
+|--------|------|-----------|------|
+| POST | `/api/auth/register` | Cadastro | - |
+| POST | `/api/auth/login` | Login | - |
 | POST | `/api/auth/refresh` | Renovar token | - |
 | POST | `/api/auth/logout` | Sair | JWT |
-| GET | `/api/auth/me` | Ver perfil | JWT |
-| PUT | `/api/auth/me` | Editar perfil | JWT |
+| GET | `/api/auth/me` | Dados do perfil | JWT |
+| PUT | `/api/auth/me` | Atualizar perfil | JWT |
 | GET | `/api/items` | Listar itens | JWT |
 | POST | `/api/items` | Criar item | JWT |
-| GET | `/api/items/:id` | Ver item | JWT |
+| GET | `/api/items/:id` | Obter item | JWT |
 | PUT | `/api/items/:id` | Atualizar item | JWT |
 | DELETE | `/api/items/:id` | Remover item | JWT |
 | GET | `/api/health` | Health check | - |
 
-### Testar via cURL
-
-```bash
-# Login
-curl -s -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@test.com","password":"admin123"}' | jq .
-
-# Health checks
-curl -s http://localhost:3000/api/health | jq .
-curl -s http://localhost:8000/api/health | jq .
-curl -s http://localhost:8080/api/health | jq .
-```
-
 ---
 
-## Arquitetura
+## Estrutura
 
 ```
 Sistema_Autenticacao/
-├── docker-compose.yml          # Orquestracao (PostgreSQL + 3 backends + Nginx + pgAdmin)
-├── .env                        # Variaveis de ambiente (ignorado pelo git)
-├── init.sql                    # Schema inicial do banco
-├── nginx.conf                  # Proxy reverso
-│
-├── node/                       # Node.js + Express + Sequelize
-│   ├── server.js               # Servidor (porta 3000)
-│   ├── Dockerfile
-│   ├── src/
-│   │   ├── config/             # Conexao com PostgreSQL
-│   │   ├── models/             # User, Item (Sequelize ORM)
-│   │   ├── middleware/         # JWT middleware
-│   │   ├── controllers/        # Logica das rotas
-│   │   ├── routes/             # auth.js, items.js
-│   │   └── seed.js             # Cria admin automaticamente
-│   └── public/                 # Frontend SPA (Bootstrap 5)
-│       ├── index.html
-│       ├── css/
-│       └── js/
-│
-├── python/                     # Python + FastAPI + SQLAlchemy
-│   ├── requirements.txt
-│   ├── Dockerfile
+├── docker-compose.yml    # PostgreSQL, 3 backends, Nginx, pgAdmin
+├── init.sql              # Schema do banco
+├── node/                 # Express + Sequelize
+│   ├── server.js
+│   ├── src/controllers/  # Logica das rotas
+│   ├── src/models/       # User, Item
+│   ├── src/middleware/   # JWT
+│   ├── src/routes/
+│   ├── src/seed.js       # Admin automatico
+│   └── public/           # Frontend Bootstrap 5
+├── python/               # FastAPI + SQLAlchemy
 │   └── app/
-│       ├── main.py             # Servidor (porta 8000)
-│       ├── config.py
-│       ├── database.py
+│       ├── main.py
+│       ├── routes/
 │       ├── models.py
 │       ├── schemas.py
-│       ├── middleware.py
-│       └── routes/             # auth.py, items.py
-│
-└── java/                       # Java + Spring Boot + JPA
-    ├── pom.xml
-    ├── Dockerfile
-    └── src/main/
-        ├── java/com/auth/
-        │   ├── AuthApplication.java
-        │   ├── config/
-        │   ├── controller/     # Auth, Item, Health
-        │   ├── dto/
-        │   ├── model/          # User, Item (JPA)
-        │   ├── repository/
-        │   └── service/
-        └── resources/
-            └── application.properties
+│       └── middleware.py
+└── java/                 # Spring Boot + JPA
+    └── src/main/java/com/auth/
+        ├── controller/
+        ├── service/
+        ├── model/
+        ├── repository/
+        └── config/
 ```
 
 ---
 
-## Comparativo das stacks
+## Seguranca
 
-| Aspecto | Node.js | Python | Java |
-|---------|---------|--------|------|
-| **Framework** | Express (leve e flexivel) | FastAPI (performatico, async) | Spring Boot 3 (maduro, enterprise) |
-| **ORM** | Sequelize (promises) | SQLAlchemy (DAO pattern) | JPA/Hibernate (padrao JEE) |
-| **Hash de senha** | bcryptjs | passlib[bcrypt] | BCryptPasswordEncoder |
-| **JWT** | jsonwebtoken | python-jose | jjwt 0.12.6 |
-| **Validacao** | Manual + middleware | Pydantic (automatica) | Bean Validation (@Valid) |
-| **Frontend** | Bootstrap 5 SPA | Swagger UI automatico | — |
-| **Porta** | 3000 | 8000 | 8080 |
-| **Paradigma** | MVC com middlewares | Rotas + injecao de dependencia | Injecao + Repositories |
-| **Mercado** | Startups / Web | IA / Dados / APIs | Bancos / Fintechs / Enterprise |
+- Senhas armazenadas com bcrypt (10 rounds)
+- Tokens JWT com expiracao e validacao de tipo
+- Refresh token rotation (cada uso gera um novo par)
+- Validacao de entrada nos controllers e schemas
+- Variaveis de ambiente via .env (arquivo ignorado pelo git)
+- Tratamento de erros sem vazar detalhes internos
 
 ---
 
-## Variaveis de Ambiente (.env)
+## Variáveis de ambiente
 
 ```env
 DB_USER=auth_user
@@ -206,42 +158,13 @@ DB_PASS=auth_password
 DB_NAME=auth_system
 DB_HOST=localhost
 DB_PORT=5432
-JWT_SECRET=seu-segredo-jwt-super-seguro-aqui-mude-em-producao
+JWT_SECRET=seu-segredo-jwt-super-seguro
 JWT_EXPIRES_IN=7d
 ```
-
-> O arquivo `.env` esta no `.gitignore` e nao e versionado. Os valores acima sao placeholders.
-
----
-
-## Solucao de problemas
-
-### Docker Desktop nao conecta
-
-```bash
-wsl --update
-```
-Depois reinicie o Docker Desktop.
-
-### Porta ocupada
-
-Se alguma porta (3000, 8000, 8080, 80, 5050) ja estiver em uso, edite o `docker-compose.yml` e altere o mapeamento.
-
-### Java nao sobe
-
-```bash
-docker compose logs java
-```
-
-O Java depende do PostgreSQL estar saudavel. O Docker Compose gerencia isso, mas se o banco demorar, o Java pode falhar na primeira tentativa.
 
 ---
 
 <div align="center">
-  <p>Feito por <strong>Bryan Feitoza</strong> — Projeto de portfolio</p>
-  <p>3 stacks, 1 banco, aprendizado infinito</p>
-  <br>
-  <a href="https://github.com/bryanfeitoza">
-    <img src="https://img.shields.io/badge/GitHub-bryanfeitoza-181717?style=for-the-badge&logo=github" alt="GitHub">
-  </a>
+  <p><strong>Bryan Feitoza</strong> — Projeto de portfolio</p>
+  <a href="https://github.com/bryanfeitoza">github.com/bryanfeitoza</a>
 </div>
