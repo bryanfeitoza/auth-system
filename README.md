@@ -8,9 +8,9 @@
 <br>
 
 <div align="center">
-  <h1>🔐 AuthSystem</h1>
+  <h1>AuthSystem</h1>
   <p><strong>for Bryan Feitoza portifolio</strong></p>
-  <p><em>Sistema completo de autenticação com JWT, bcrypt, PostgreSQL e CRUD — implementado em 3 stacks diferentes no mesmo repositório</em></p>
+  <p><em>Sistema completo de autenticacao com JWT, bcrypt, PostgreSQL e CRUD — implementado em 3 stacks diferentes no mesmo repositorio</em></p>
 </div>
 
 <br>
@@ -35,25 +35,25 @@
 
 ---
 
-## ✨ Features
+## Funcionalidades
 
-| | Funcionalidade | Node.js | Python | Java |
-|---|---|---|---|---|
-| 🔐 | **Registro de usuário** | ✅ | ✅ | ✅ |
-| 🔑 | **Login com JWT** | ✅ | ✅ | ✅ |
-| 🔄 | **Refresh Token** | ✅ | ✅ | ✅ |
-| 👤 | **Perfil (CRUD)** | ✅ | ✅ | ✅ |
-| 📦 | **Itens (CRUD completo)** | ✅ | ✅ | ✅ |
-| 🛡️ | **Senhas com bcrypt** | ✅ | ✅ | ✅ |
-| 🎨 | **Frontend Bootstrap 5** | ✅ | ❌ (Swagger) | ❌ |
-| 📊 | **Paginação e busca** | ✅ | ✅ | ✅ |
-| 🩺 | **Health check** | ✅ | ✅ | ✅ |
+| Funcionalidade | Node.js | Python | Java |
+|---|---|---|---|
+| Registro de usuario | Sim | Sim | Sim |
+| Login com JWT | Sim | Sim | Sim |
+| Refresh Token | Sim | Sim | Sim |
+| Perfil (CRUD) | Sim | Sim | Sim |
+| Itens (CRUD completo) | Sim | Sim | Sim |
+| Senhas com bcrypt | Sim | Sim | Sim |
+| Frontend Bootstrap 5 | Sim | Nao (Swagger) | Nao |
+| Paginacao e busca | Sim | Sim | Sim |
+| Health check | Sim | Sim | Sim |
 
 ---
 
-## 🚀 Como iniciar
+## Como iniciar
 
-### Pré-requisitos
+### Pre-requisitos
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando
 - WSL2 atualizado (Windows): `wsl --update`
@@ -64,15 +64,15 @@
 docker compose up -d --build
 ```
 
-### Acessar os serviços
+### Acessar os servicos
 
-| Serviço | URL | Descrição |
+| Servico | URL | Descricao |
 |---------|-----|-----------|
-| 🌐 **Node.js** | http://localhost:3000 | Frontend completo + API REST |
-| 🐍 **Python** | http://localhost:8000/docs | Swagger UI interativo |
-| ☕ **Java** | http://localhost:8080/api/health | Health check |
-| 🗄️ **pgAdmin** | http://localhost:5050 | `admin@admin.com` / `admin` |
-| 🔁 **Nginx** | http://localhost | Proxy reverso |
+| Node.js | http://localhost:3000 | Frontend completo + API REST |
+| Python | http://localhost:8000/docs | Swagger UI interativo |
+| Java | http://localhost:8080/api/health | Health check |
+| pgAdmin | http://localhost:5050 | `admin@admin.com` / `admin` |
+| Nginx | http://localhost | Proxy reverso |
 
 ### Parar
 
@@ -82,43 +82,35 @@ docker compose down
 
 ---
 
-## 🧪 Como testar
+## Como testar
 
-### Login admin automático
+### Login admin automatico
 
-Na inicialização do Node.js, um usuário admin é criado automaticamente:
+Na inicializacao do Node.js, um usuario admin e criado automaticamente:
 
 | Campo | Valor |
 |-------|-------|
 | **Email** | `admin@test.com` |
 | **Senha** | `admin123` |
 
-Acesse http://localhost:3000 e faça login. Você verá a dica do admin direto na tela de login.
+Acesse http://localhost:3000 e faca login. A dica do admin aparece direto na tela de login.
 
 ### Endpoints da API
 
-```
-┌────────┬──────────────────────┬─────────────────────┬───────────────┐
-│ Método │ Rota                 │ Descrição           │ Autenticação  │
-├────────┼──────────────────────┼─────────────────────┼───────────────┤
-│ POST   │ /api/auth/register   │ Criar conta         │ ❌           │
-│ POST   │ /api/auth/login      │ Fazer login         │ ❌           │
-│ POST   │ /api/auth/refresh    │ Renovar token       │ ❌           │
-│ POST   │ /api/auth/logout     │ Sair                │ ✅ JWT       │
-│ GET    │ /api/auth/me         │ Ver perfil          │ ✅ JWT       │
-│ PUT    │ /api/auth/me         │ Editar perfil       │ ✅ JWT       │
-│ GET    │ /api/items           │ Listar itens        │ ✅ JWT       │
-│ POST   │ /api/items           │ Criar item          │ ✅ JWT       │
-│ GET    │ /api/items/:id       │ Ver item            │ ✅ JWT       │
-│ PUT    │ /api/items/:id       │ Atualizar item      │ ✅ JWT       │
-│ DELETE │ /api/items/:id       │ Remover item        │ ✅ JWT       │
-│ GET    │ /api/health          │ Health check        │ ❌           │
-└────────┴──────────────────────┴─────────────────────┴───────────────┘
-```
-
-### Testar via Swagger
-
-Acesse http://localhost:8000/docs e teste todos os endpoints pelo navegador.
+| Metodo | Rota | Descricao | Autenticacao |
+|--------|------|-----------|-------------|
+| POST | `/api/auth/register` | Criar conta | - |
+| POST | `/api/auth/login` | Fazer login | - |
+| POST | `/api/auth/refresh` | Renovar token | - |
+| POST | `/api/auth/logout` | Sair | JWT |
+| GET | `/api/auth/me` | Ver perfil | JWT |
+| PUT | `/api/auth/me` | Editar perfil | JWT |
+| GET | `/api/items` | Listar itens | JWT |
+| POST | `/api/items` | Criar item | JWT |
+| GET | `/api/items/:id` | Ver item | JWT |
+| PUT | `/api/items/:id` | Atualizar item | JWT |
+| DELETE | `/api/items/:id` | Remover item | JWT |
+| GET | `/api/health` | Health check | - |
 
 ### Testar via cURL
 
@@ -136,77 +128,77 @@ curl -s http://localhost:8080/api/health | jq .
 
 ---
 
-## 🏗️ Arquitetura do projeto
+## Arquitetura
 
 ```
-📁 Sistema_Autenticação/
-├── 📄 docker-compose.yml          # Orquestração (PostgreSQL + 3 backends + Nginx + pgAdmin)
-├── 📄 .env                        # Variáveis de ambiente (ignorado pelo git)
-├── 📄 init.sql                    # Schema inicial do banco
-├── 📄 nginx.conf                  # Proxy reverso
+Sistema_Autenticacao/
+├── docker-compose.yml          # Orquestracao (PostgreSQL + 3 backends + Nginx + pgAdmin)
+├── .env                        # Variaveis de ambiente (ignorado pelo git)
+├── init.sql                    # Schema inicial do banco
+├── nginx.conf                  # Proxy reverso
 │
-├── 📁 node/                       # 🟢 Node.js + Express + Sequelize
-│   ├── 📄 server.js               # Servidor (porta 3000)
-│   ├── 📄 Dockerfile
-│   ├── 📁 src/
-│   │   ├── 📁 config/             # Conexão com PostgreSQL
-│   │   ├── 📁 models/             # User, Item (Sequelize ORM)
-│   │   ├── 📁 middleware/         # JWT middleware
-│   │   ├── 📁 controllers/        # Lógica das rotas
-│   │   ├── 📁 routes/             # auth.js, items.js
-│   │   └── 📄 seed.js             # Cria admin automaticamente
-│   └── 📁 public/                 # Frontend SPA (Bootstrap 5)
-│       ├── 📄 index.html
-│       ├── 📁 css/
-│       └── 📁 js/
+├── node/                       # Node.js + Express + Sequelize
+│   ├── server.js               # Servidor (porta 3000)
+│   ├── Dockerfile
+│   ├── src/
+│   │   ├── config/             # Conexao com PostgreSQL
+│   │   ├── models/             # User, Item (Sequelize ORM)
+│   │   ├── middleware/         # JWT middleware
+│   │   ├── controllers/        # Logica das rotas
+│   │   ├── routes/             # auth.js, items.js
+│   │   └── seed.js             # Cria admin automaticamente
+│   └── public/                 # Frontend SPA (Bootstrap 5)
+│       ├── index.html
+│       ├── css/
+│       └── js/
 │
-├── 📁 python/                     # 🔵 Python + FastAPI + SQLAlchemy
-│   ├── 📄 requirements.txt
-│   ├── 📄 Dockerfile
-│   └── 📁 app/
-│       ├── 📄 main.py             # Servidor (porta 8000)
-│       ├── 📄 config.py
-│       ├── 📄 database.py
-│       ├── 📄 models.py
-│       ├── 📄 schemas.py
-│       ├── 📄 middleware.py
-│       └── 📁 routes/             # auth.py, items.py
+├── python/                     # Python + FastAPI + SQLAlchemy
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── app/
+│       ├── main.py             # Servidor (porta 8000)
+│       ├── config.py
+│       ├── database.py
+│       ├── models.py
+│       ├── schemas.py
+│       ├── middleware.py
+│       └── routes/             # auth.py, items.py
 │
-└── 📁 java/                       # 🟠 Java + Spring Boot + JPA
-    ├── 📄 pom.xml
-    ├── 📄 Dockerfile
-    └── 📁 src/main/
-        ├── 📁 java/com/auth/
-        │   ├── 📄 AuthApplication.java
-        │   ├── 📁 config/
-        │   ├── 📁 controller/     # Auth, Item, Health
-        │   ├── 📁 dto/
-        │   ├── 📁 model/          # User, Item (JPA)
-        │   ├── 📁 repository/
-        │   └── 📁 service/
-        └── 📁 resources/
-            └── 📄 application.properties
+└── java/                       # Java + Spring Boot + JPA
+    ├── pom.xml
+    ├── Dockerfile
+    └── src/main/
+        ├── java/com/auth/
+        │   ├── AuthApplication.java
+        │   ├── config/
+        │   ├── controller/     # Auth, Item, Health
+        │   ├── dto/
+        │   ├── model/          # User, Item (JPA)
+        │   ├── repository/
+        │   └── service/
+        └── resources/
+            └── application.properties
 ```
 
 ---
 
-## 🛠️ Comparativo das stacks
+## Comparativo das stacks
 
-| Aspecto | 🟢 Node.js | 🔵 Python | 🟠 Java |
-|---------|-----------|-----------|---------|
-| **Framework** | Express (leve e flexível) | FastAPI (performático, async) | Spring Boot 3 (maduro, enterprise) |
-| **ORM** | Sequelize (promises) | SQLAlchemy (DAO pattern) | JPA/Hibernate (padrão JEE) |
+| Aspecto | Node.js | Python | Java |
+|---------|---------|--------|------|
+| **Framework** | Express (leve e flexivel) | FastAPI (performatico, async) | Spring Boot 3 (maduro, enterprise) |
+| **ORM** | Sequelize (promises) | SQLAlchemy (DAO pattern) | JPA/Hibernate (padrao JEE) |
 | **Hash de senha** | bcryptjs | passlib[bcrypt] | BCryptPasswordEncoder |
 | **JWT** | jsonwebtoken | python-jose | jjwt 0.12.6 |
-| **Validação** | Manual + middleware | Pydantic (automática) | Bean Validation (@Valid) |
-| **Frontend** | Bootstrap 5 SPA | Swagger UI automático | — |
+| **Validacao** | Manual + middleware | Pydantic (automatica) | Bean Validation (@Valid) |
+| **Frontend** | Bootstrap 5 SPA | Swagger UI automatico | — |
 | **Porta** | 3000 | 8000 | 8080 |
-| **Paradigma** | MVC com middlewares | Rotas + injeção de dependência | Injeção + Repositories |
+| **Paradigma** | MVC com middlewares | Rotas + injecao de dependencia | Injecao + Repositories |
 | **Mercado** | Startups / Web | IA / Dados / APIs | Bancos / Fintechs / Enterprise |
 
 ---
 
-## ⚙️ Variáveis de Ambiente (.env)
+## Variaveis de Ambiente (.env)
 
 ```env
 DB_USER=auth_user
@@ -218,13 +210,13 @@ JWT_SECRET=seu-segredo-jwt-super-seguro-aqui-mude-em-producao
 JWT_EXPIRES_IN=7d
 ```
 
-> ⚠️ O arquivo `.env` está no `.gitignore` e **não é versionado**. Os valores acima são placeholders.
+> O arquivo `.env` esta no `.gitignore` e nao e versionado. Os valores acima sao placeholders.
 
 ---
 
-## 🐞 Solução de problemas
+## Solucao de problemas
 
-### Docker Desktop não conecta
+### Docker Desktop nao conecta
 
 ```bash
 wsl --update
@@ -233,35 +225,23 @@ Depois reinicie o Docker Desktop.
 
 ### Porta ocupada
 
-Se alguma porta (3000, 8000, 8080, 80, 5050) já estiver em uso, edite o `docker-compose.yml` e altere o mapeamento.
+Se alguma porta (3000, 8000, 8080, 80, 5050) ja estiver em uso, edite o `docker-compose.yml` e altere o mapeamento.
 
-### Java não sobe
-
-Verifique os logs:
+### Java nao sobe
 
 ```bash
 docker compose logs java
 ```
 
-O Java depende do PostgreSQL estar saudável. O Docker Compose gerencia isso, mas se o banco demorar, o Java pode falhar na primeira tentativa.
-
-### Quer contribuir?
-
-Sinta-se à vontade para abrir issues ou enviar PRs!
+O Java depende do PostgreSQL estar saudavel. O Docker Compose gerencia isso, mas se o banco demorar, o Java pode falhar na primeira tentativa.
 
 ---
 
 <div align="center">
-  <p>
-    <sub>Feito com ❤️ por <strong>Bryan Feitoza</strong></sub>
-  </p>
-  <p>
-    <sub>Projeto de portfólio — 3 stacks, 1 banco, aprendizado infinito</sub>
-  </p>
+  <p>Feito por <strong>Bryan Feitoza</strong> — Projeto de portfolio</p>
+  <p>3 stacks, 1 banco, aprendizado infinito</p>
   <br>
-  <p>
-    <a href="https://github.com/bryanfeitoza">
-      <img src="https://img.shields.io/badge/GitHub-bryanfeitoza-181717?style=for-the-badge&logo=github" alt="GitHub">
-    </a>
-  </p>
+  <a href="https://github.com/bryanfeitoza">
+    <img src="https://img.shields.io/badge/GitHub-bryanfeitoza-181717?style=for-the-badge&logo=github" alt="GitHub">
+  </a>
 </div>
